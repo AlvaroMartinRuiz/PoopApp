@@ -1,6 +1,8 @@
 package es.uc3m.android.poopapp
 
 import android.os.Bundle
+import android.view.Gravity
+import android.widget.TextView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
@@ -26,10 +28,30 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
+                R.id.navigation_map, R.id.navigation_tracker, R.id.navigation_shitshare, R.id.navigation_settings
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        // Center the title in the action bar
+        supportActionBar?.apply {
+            setDisplayShowCustomEnabled(true)
+            setDisplayShowTitleEnabled(false)
+            val titleTextView = TextView(this@MainActivity)
+            titleTextView.layoutParams = android.widget.LinearLayout.LayoutParams(
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                android.widget.LinearLayout.LayoutParams.MATCH_PARENT
+            )
+            titleTextView.gravity = Gravity.CENTER
+            titleTextView.setTextColor(getColor(R.color.white))
+            titleTextView.textSize = 20f
+            customView = titleTextView
+
+            // Update the title when navigation changes
+            navController.addOnDestinationChangedListener { _, destination, _ ->
+                titleTextView.text = destination.label
+            }
+        }
     }
 }
