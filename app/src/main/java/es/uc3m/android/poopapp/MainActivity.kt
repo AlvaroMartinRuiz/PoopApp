@@ -33,10 +33,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import es.uc3m.android.poopapp.firebase.AuthManager
+import es.uc3m.android.poopapp.screens.AuthScreen
 import es.uc3m.android.poopapp.screens.MapScreen
-import es.uc3m.android.poopapp.screens.TrackerScreen
-import es.uc3m.android.poopapp.screens.ShitShareScreen
 import es.uc3m.android.poopapp.screens.SettingsScreen
+import es.uc3m.android.poopapp.screens.ShitShareScreen
+import es.uc3m.android.poopapp.screens.TrackerScreen
 import es.uc3m.android.poopapp.ui.theme.PoopAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -49,6 +51,14 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainScreen()
+                    
+                    // Authentication dialog
+                    AuthScreen(
+                        showDialog = AuthManager.showAuthDialog,
+                        onDismiss = { AuthManager.dismissAuthDialog() },
+                        onLoginSuccess = { AuthManager.onLoginSuccess() },
+                        firebaseManager = AuthManager.getFirebaseManager()
+                    )
                 }
             }
         }
@@ -110,12 +120,31 @@ fun MainScreen() {
                         label = { Text(stringResource(screen.resourceId)) },
                         selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                         onClick = {
-                            navController.navigate(screen.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                            // For screens that require login, check authentication first
+                            when (screen) {
+                                Screen.ShitShare -> {
+                                    // ShitShare requires login
+                                    AuthManager.requireLogin {
+                                        // This will be called after successful login
+                                        navController.navigate(screen.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
+                                    }
                                 }
-                                launchSingleTop = true
-                                restoreState = true
+                                else -> {
+                                    // Other screens don't require login
+                                    navController.navigate(screen.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                }
                             }
                         }
                     )
@@ -129,9 +158,23 @@ fun MainScreen() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Map.route) { MapScreen() }
-            composable(Screen.Tracker.route) { TrackerScreen() }
+            composable(Screen.Tracker.route) { 
+                // Tracker screen requires login to save personal tracking data
+                TrackerScreen(
+                    onRequireLogin = { callback ->
+                        AuthManager.requireLogin(callback)
+                    }
+                ) 
+            }
             composable(Screen.ShitShare.route) { ShitShareScreen() }
-            composable(Screen.Settings.route) { SettingsScreen() }
+            composable(Screen.Settings.route) { 
+                SettingsScreen(
+                    isAuthenticated = AuthManager.isAuthenticated,
+                    username = AuthManager.currentUserDisplayName,
+                    onSignInClick = { AuthManager.requireLogin() },
+                    onSignOutClick = { AuthManager.signOut() }
+                ) 
+            }
         }
     }
 }
