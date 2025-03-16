@@ -33,12 +33,7 @@ object AuthManager {
     
     init {
         // Initialize with current Firebase user
-        currentUser = firebaseManager.getCurrentUser()
-        isAuthenticated = currentUser != null
-        // Initialize display name if user is already logged in
-        if (isAuthenticated) {
-            updateDisplayName()
-        }
+        resetAuthState()
     }
     
     /**
@@ -59,10 +54,25 @@ object AuthManager {
      * Called after successful login/registration
      */
     fun onLoginSuccess() {
+        println("📱 PoopApp: AuthManager - onLoginSuccess called")
         currentUser = firebaseManager.getCurrentUser()
-        isAuthenticated = true
-        updateDisplayName()
-        pendingAction?.invoke()
+        println("📱 PoopApp: AuthManager - Current user: ${currentUser?.email}")
+        
+        isAuthenticated = currentUser != null
+        if (isAuthenticated) {
+            println("📱 PoopApp: AuthManager - User is authenticated")
+            updateDisplayName()
+            println("📱 PoopApp: AuthManager - DisplayName updated to: $currentUserDisplayName")
+        } else {
+            println("📱 PoopApp: AuthManager - Warning: onLoginSuccess called but user is null")
+        }
+        
+        // Execute pending action even if something went wrong, 
+        // the UI will handle displaying appropriate state
+        pendingAction?.let { action ->
+            println("📱 PoopApp: AuthManager - Executing pending action")
+            action()
+        }
         pendingAction = null
     }
     
@@ -91,6 +101,26 @@ object AuthManager {
         currentUser = null
         isAuthenticated = false
         currentUserDisplayName = "Guest"
+    }
+    
+    /**
+     * Completely reset authentication state and clear all cached data
+     * Use this when switching Firebase projects or troubleshooting auth issues
+     */
+    fun resetAuthState() {
+        // Clear Firebase Auth cache
+        firebaseManager.clearAuthCache()
+        
+        // Reset local state
+        currentUser = firebaseManager.getCurrentUser()
+        isAuthenticated = currentUser != null
+        
+        // Initialize display name if user is already logged in
+        if (isAuthenticated) {
+            updateDisplayName()
+        } else {
+            currentUserDisplayName = "Guest"
+        }
     }
     
     /**

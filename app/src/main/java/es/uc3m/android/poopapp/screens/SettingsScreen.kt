@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import es.uc3m.android.poopapp.firebase.AuthManager
 
 @Composable
 fun SettingsScreen(
@@ -223,6 +225,69 @@ fun SettingsScreen(
                 }
             }
         }
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        // Troubleshooting Section
+        Text(
+            text = "Troubleshooting",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFF5C4033),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        )
+        
+        SettingsCard {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Having issues with authentication?",
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+                
+                Button(
+                    onClick = { 
+                        // Reset authentication state
+                        AuthManager.resetAuthState()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF5C4033)
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Reset Authentication",
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                    Text(
+                        text = "Reset Authentication Cache",
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                
+                Text(
+                    text = "Use this if you've changed Firebase projects or are experiencing sign-in issues",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 8.dp, start = 16.dp, end = 16.dp)
+                )
+            }
+        }
+        
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
