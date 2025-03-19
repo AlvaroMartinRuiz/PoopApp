@@ -3,9 +3,8 @@ package es.uc3m.android.poopapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
@@ -16,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,6 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -39,11 +41,16 @@ import es.uc3m.android.poopapp.screens.MapScreen
 import es.uc3m.android.poopapp.screens.SettingsScreen
 import es.uc3m.android.poopapp.screens.ShitShareScreen
 import es.uc3m.android.poopapp.screens.TrackerScreen
+import es.uc3m.android.poopapp.ui.theme.DarkBrown
+import es.uc3m.android.poopapp.ui.theme.LightBrown
+import es.uc3m.android.poopapp.ui.theme.MediumBrown
 import es.uc3m.android.poopapp.ui.theme.PoopAppTheme
+import es.uc3m.android.poopapp.ui.theme.White
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
         setContent {
             PoopAppTheme {
                 Surface(
@@ -77,29 +84,9 @@ fun MainScreen() {
     )
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    val navBackStackEntry by navController.currentBackStackEntryAsState()
-                    val currentDestination = navBackStackEntry?.destination
-                    val currentScreen = items.find { screen ->
-                        currentDestination?.hierarchy?.any { it.route == screen.route } == true
-                    } ?: Screen.Map
-                    Text(
-                        text = stringResource(currentScreen.resourceId),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF5C4033),
-                    titleContentColor = Color.White
-                )
-            )
-        },
         bottomBar = {
             NavigationBar(
-                containerColor = Color(0xFFD4BEA5)
+                containerColor = LightBrown
             ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentDestination = navBackStackEntry?.destination
@@ -119,11 +106,18 @@ fun MainScreen() {
                         },
                         label = { Text(stringResource(screen.resourceId)) },
                         selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = DarkBrown,
+                            selectedTextColor = DarkBrown,
+                            indicatorColor = MediumBrown,
+                            unselectedIconColor = DarkBrown,
+                            unselectedTextColor = DarkBrown
+                        ),
                         onClick = {
                             // For screens that require login, check authentication first
                             when (screen) {
-                                Screen.ShitShare -> {
-                                    // ShitShare requires login
+                                Screen.ShitShare, Screen.Tracker -> {
+                                    // These screens require login
                                     AuthManager.requireLogin {
                                         // This will be called after successful login
                                         navController.navigate(screen.route) {
@@ -158,14 +152,7 @@ fun MainScreen() {
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Screen.Map.route) { MapScreen() }
-            composable(Screen.Tracker.route) { 
-                // Tracker screen requires login to save personal tracking data
-                TrackerScreen(
-                    onRequireLogin = { callback ->
-                        AuthManager.requireLogin(callback)
-                    }
-                ) 
-            }
+            composable(Screen.Tracker.route) { TrackerScreen() }
             composable(Screen.ShitShare.route) { ShitShareScreen() }
             composable(Screen.Settings.route) { 
                 SettingsScreen(
