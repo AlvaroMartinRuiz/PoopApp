@@ -46,11 +46,14 @@ import es.uc3m.android.poopapp.ui.theme.LightBrown
 import es.uc3m.android.poopapp.ui.theme.MediumBrown
 import es.uc3m.android.poopapp.ui.theme.PoopAppTheme
 import es.uc3m.android.poopapp.ui.theme.White
+import es.uc3m.android.poopapp.firebase.FirebaseManager
+import com.google.firebase.auth.FirebaseAuth
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         setContent {
             PoopAppTheme {
                 Surface(
@@ -58,7 +61,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     MainScreen()
-                    
+
                     // Authentication dialog
                     AuthScreen(
                         showDialog = AuthManager.showAuthDialog,
@@ -82,7 +85,8 @@ fun MainScreen() {
         Screen.ShitShare,
         Screen.Settings
     )
-
+    val firebaseManager = FirebaseManager()
+    val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
     Scaffold(
         bottomBar = {
             NavigationBar(
@@ -153,14 +157,14 @@ fun MainScreen() {
         ) {
             composable(Screen.Map.route) { MapScreen() }
             composable(Screen.Tracker.route) { TrackerScreen() }
-            composable(Screen.ShitShare.route) { ShitShareScreen() }
-            composable(Screen.Settings.route) { 
+            composable(Screen.ShitShare.route) { ShitShareScreen(firebaseManager,userId) }
+            composable(Screen.Settings.route) {
                 SettingsScreen(
                     isAuthenticated = AuthManager.isAuthenticated,
                     username = AuthManager.currentUserDisplayName,
                     onSignInClick = { AuthManager.requireLogin() },
                     onSignOutClick = { AuthManager.signOut() }
-                ) 
+                )
             }
         }
     }

@@ -45,7 +45,7 @@ fun LeaderboardView(leagueId: String, currentUserId: String) {
 
         LazyColumn {
             itemsIndexed(leaderboardEntries) { index, entry ->
-            LeaderboardItem(
+                LeaderboardItem(
                     entry = entry,
                     rank = index + 1,
                     isCurrentUser = entry.userId == currentUserId
@@ -55,8 +55,12 @@ fun LeaderboardView(leagueId: String, currentUserId: String) {
     }
 }
 
+
+// -------------------------------------------------------------------
+// LeaderboardItem
+// -------------------------------------------------------------------
 @Composable
-private fun LeaderboardItem(
+fun LeaderboardItem(
     entry: LeaderboardEntry,
     rank: Int,
     isCurrentUser: Boolean
@@ -66,9 +70,9 @@ private fun LeaderboardItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isCurrentUser) 
-                MaterialTheme.colorScheme.primaryContainer 
-            else 
+            containerColor = if (isCurrentUser)
+                MaterialTheme.colorScheme.primaryContainer
+            else
                 MaterialTheme.colorScheme.surface
         )
     ) {
@@ -76,28 +80,10 @@ private fun LeaderboardItem(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text(
-                    text = "#$rank",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = entry.username,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-            Text(
-                text = "${entry.poopCount} poops",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Text("#$rank ${entry.username}")
+            Text("${entry.poopCount} poops")
         }
     }
-} 
+}

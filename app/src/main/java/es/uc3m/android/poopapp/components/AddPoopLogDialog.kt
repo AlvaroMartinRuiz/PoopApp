@@ -10,12 +10,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.google.firebase.Firebase
 import es.uc3m.android.poopapp.data.model.BristolType
 import es.uc3m.android.poopapp.data.model.PoopLog
-import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
+import java.util.Date
 import es.uc3m.android.poopapp.firebase.FirebaseManager
+import es.uc3m.android.poopapp.firebase.FirebaseRepository
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
@@ -133,7 +133,7 @@ fun AddPoopLogDialog(
                         onClick = {
 
                             val poopLog = PoopLog(
-                                timestamp = Timestamp.now(), // ✅ Assign current Firestore timestamp
+                                timestamp = Date(), // ✅ Assign current Firestore timestamp
                                 bristolScale = bristolScale,
                                 duration = duration,
                                 strain = strain,
@@ -157,7 +157,6 @@ fun AddPoopLogDialog(
                             } else {
                                 println(" No authenticated user found.")
                             }
-                            onDismiss()
                         }
                     ) {
                         Text("Save")

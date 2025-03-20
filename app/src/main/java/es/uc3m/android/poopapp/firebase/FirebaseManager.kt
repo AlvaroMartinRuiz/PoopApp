@@ -204,29 +204,6 @@ class FirebaseManager {
                 onError(e.message ?: "Unknown error")
             }
     }
-    suspend fun getLeaderboardEntries(leagueId: String): List<LeaderboardEntry> {
-        return try {
-            firestore.collection("leaderboard_entries")
-                .whereEqualTo("leagueId", leagueId)
-                .get()
-                .await()
-                .toObjects(LeaderboardEntry::class.java)
-        } catch (e: Exception) {
-            println("❌ Error fetching leaderboard entries: ${e.message}")
-            emptyList()
-        }
-    }
-
-    suspend fun getLeagues(): List<League> {
-        return try {
-            firestore.collection("leagues")
-                .get()
-                .await()
-                .toObjects(League::class.java) // Ensure correct type conversion
-        } catch (e: Exception) {
-            emptyList()
-        }
-    }
 
 
     fun createLeague(
@@ -260,7 +237,84 @@ class FirebaseManager {
                 onError(e.message ?: "Unknown error")
             }
     }
+    suspend fun getLeaderboardEntries(leagueId: String): List<LeaderboardEntry> {
+        return try {
+            firestore.collection("leaderboard_entries")
+                .whereEqualTo("leagueId", leagueId)
+                .get()
+                .await()
+                .toObjects(LeaderboardEntry::class.java)
+        } catch (e: Exception) {
+            println("❌ Error fetching leaderboard entries: ${e.message}")
+            emptyList()
+        }
+    }
 
+     suspend fun getLeagues(): List<League> {
+        return try {
+            firestore.collection("leagues")
+                .get()
+                .await()
+                .toObjects(League::class.java) // Ensure correct type conversion
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
 
+    fun createLeague(name: String, createdBy: String) {
+        val league = League(
+            id = "", // Let Firestore auto-generate
+            name = name,
+            createdBy = createdBy,
+            members = listOf(createdBy)
+        )
+        firestore.collection("leagues").add(league)
+    }
+
+    suspend fun getLeagueByInviteCode(code: String): League? {
+        return try {
+            val result = firestore.collection("leagues")
+                .whereEqualTo("inviteCode", code)
+                .get()
+                .await()
+
+            if (!result.isEmpty) {
+                result.documents[0].toObject(League::class.java)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun joinLeague(userId: String, league: League) {
+        val updatedMembers = league.members + userId
+        firestore.collection("leagues").document(league.id)
+            .update("members", updatedMembers)
+    }
+    fun updateUserProfile(
+        user: User,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        try {
+            // Reference to the user's document in Firestore
+            val userRef = firestore.collection("users").document(user.uid)
+
+            // Write the updated User object to Firestore
+            // If you need to preserve certain fields (like createdAt), you can do partial updates or use merge()
+            userRef.set(user)
+                .addOnSuccessListener {
+                    onSuccess()
+                }
+                .addOnFailureListener { e ->
+                    onError(e.message ?: "Failed to update user profile")
+                }
+
+        } catch (e: Exception) {
+            onError("Exception during profile update: ${e.message}")
+        }
+    }
 }
 

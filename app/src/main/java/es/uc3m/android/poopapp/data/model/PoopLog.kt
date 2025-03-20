@@ -1,17 +1,48 @@
 package es.uc3m.android.poopapp.data.model
 
 import com.google.firebase.Timestamp
+import java.util.Date
 
 data class PoopLog(
-    val id: String = "",
-    val userId: String = "",
-    val timestamp: Timestamp = Timestamp.now(),
-        val bristolScale: Int = 4, // 1-7 Bristol Stool Scale
-    val duration: Int = 0, // Duration in minutes
-    val strain: Int = 0, // 1-5 scale
-    val completeness: Int = 0, // 1-5 scale
-    val notes: String = ""
-)
+    val id: String = "", // We'll fix this to generate proper IDs
+    val bristolScale: Int = 1,
+    val completeness: Int = 3,
+    val duration: Int = 0,
+    val notes: String = "",
+    val strain: Int = 3,
+    val timestamp: Date = Date(),
+    val userId: String = "" // This is redundant but keeping for data integrity
+) {
+    // Convert to HashMap for Firebase
+    fun toMap(): Map<String, Any> {
+        return hashMapOf(
+            "id" to id,
+            "bristolScale" to bristolScale,
+            "completeness" to completeness,
+            "duration" to duration,
+            "notes" to notes,
+            "strain" to strain,
+            "timestamp" to timestamp,
+            "userId" to userId
+        )
+    }
+    
+    companion object {
+        // Convert from Firebase to PoopLog
+        fun fromMap(data: Map<String, Any>, documentId: String): PoopLog {
+            return PoopLog(
+                id = documentId, // Use the document ID as the poop log ID
+                bristolScale = (data["bristolScale"] as? Number)?.toInt() ?: 1,
+                completeness = (data["completeness"] as? Number)?.toInt() ?: 3,
+                duration = (data["duration"] as? Number)?.toInt() ?: 0,
+                notes = data["notes"] as? String ?: "",
+                strain = (data["strain"] as? Number)?.toInt() ?: 3,
+                timestamp = (data["timestamp"] as? Timestamp)?.toDate() ?: Date(),
+                userId = data["userId"] as? String ?: ""
+            )
+        }
+    }
+}
 
 // Bristol Stool Scale descriptions
 enum class BristolType(val description: String) {

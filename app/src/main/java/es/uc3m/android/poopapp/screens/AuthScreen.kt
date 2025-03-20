@@ -48,7 +48,7 @@ fun AuthScreen(
     coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) {
     if (!showDialog) return
-    
+
     var isLogin by remember { mutableStateOf(true) }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -56,11 +56,11 @@ fun AuthScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
-    
+
     val focusManager = LocalFocusManager.current
-    
-    Dialog(onDismissRequest = { 
-        if (!isLoading) onDismiss() 
+
+    Dialog(onDismissRequest = {
+        if (!isLoading) onDismiss()
     }) {
         Card(
             modifier = Modifier
@@ -91,9 +91,9 @@ fun AuthScreen(
                         fontSize = 40.sp,
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 // Title
                 Text(
                     text = if (isLogin) "Welcome Back!" else "Join PoopApp",
@@ -101,9 +101,9 @@ fun AuthScreen(
                     fontWeight = FontWeight.Bold,
                     color = DarkBrown
                 )
-                
+
                 Spacer(modifier = Modifier.height(8.dp))
-                
+
                 // Subtitle
                 Text(
                     text = if (isLogin) "Sign in to continue" else "Create your account",
@@ -111,9 +111,9 @@ fun AuthScreen(
                     color = Gray,
                     textAlign = TextAlign.Center
                 )
-                
+
                 Spacer(modifier = Modifier.height(24.dp))
-                
+
                 // Error message
                 if (errorMessage != null) {
                     Text(
@@ -123,7 +123,7 @@ fun AuthScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }
-                
+
                 // Username field (only for registration)
                 if (!isLogin) {
                     OutlinedTextField(
@@ -147,10 +147,10 @@ fun AuthScreen(
                             unfocusedBorderColor = LightBrown
                         )
                     )
-                    
+
                     Spacer(modifier = Modifier.height(16.dp))
                 }
-                
+
                 // Email field
                 OutlinedTextField(
                     value = email,
@@ -174,9 +174,9 @@ fun AuthScreen(
                         unfocusedBorderColor = LightBrown
                     )
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 // Password field
                 OutlinedTextField(
                     value = password,
@@ -205,7 +205,7 @@ fun AuthScreen(
                             if (isLogin) {
                                 if (validateLoginInputs(email, password)) {
                                     handleLogin(
-                                        email, password, 
+                                        email, password,
                                         firebaseManager, coroutineScope,
                                         onSuccess = {
                                             isLoading = false
@@ -255,9 +255,9 @@ fun AuthScreen(
                         unfocusedBorderColor = LightBrown
                     )
                 )
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 // Forgot password (only for login)
                 if (isLogin) {
                     TextButton(
@@ -269,10 +269,10 @@ fun AuthScreen(
                             color = DarkBrown
                         )
                     }
-                    
+
                     Spacer(modifier = Modifier.height(8.dp))
                 }
-                
+
                 // Login/Register button
                 Button(
                     onClick = {
@@ -281,7 +281,7 @@ fun AuthScreen(
                         if (isLogin) {
                             if (validateLoginInputs(email, password)) {
                                 handleLogin(
-                                    email, password, 
+                                    email, password,
                                     firebaseManager, coroutineScope,
                                     onSuccess = {
                                         isLoading = false
@@ -346,9 +346,9 @@ fun AuthScreen(
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 // Switch between login and register
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -359,7 +359,7 @@ fun AuthScreen(
                         text = if (isLogin) "Don't have an account?" else "Already have an account?",
                         color = Gray
                     )
-                    TextButton(onClick = { 
+                    TextButton(onClick = {
                         isLogin = !isLogin
                         errorMessage = null
                     }) {
@@ -380,8 +380,8 @@ private fun validateLoginInputs(email: String, password: String): Boolean {
 }
 
 private fun validateRegisterInputs(email: String, password: String, username: String): Boolean {
-    return email.isNotBlank() && password.isNotBlank() && username.isNotBlank() 
-        && email.contains("@") && password.length >= 6
+    return email.isNotBlank() && password.isNotBlank() && username.isNotBlank()
+            && email.contains("@") && password.length >= 6
 }
 
 private fun handleLogin(
@@ -424,4 +424,4 @@ private fun handleRegister(
             onError = { onError(it) }
         )
     }
-} 
+}

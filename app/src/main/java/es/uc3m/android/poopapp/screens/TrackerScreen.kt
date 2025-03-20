@@ -15,24 +15,49 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowInsetsCompat
+import es.uc3m.android.poopapp.data.model.PoopLog
 import es.uc3m.android.poopapp.data.model.PoopStats
 import es.uc3m.android.poopapp.firebase.AuthManager
+import es.uc3m.android.poopapp.firebase.FirebaseRepository
 import es.uc3m.android.poopapp.ui.components.AddPoopLogDialog
 import es.uc3m.android.poopapp.ui.theme.*
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TrackerScreen() {
     var showAddDialog by remember { mutableStateOf(false) }
-    
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    // State for statistics
+    var stats by remember { mutableStateOf<PoopStats?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+
     // Check authentication status
     val isAuthenticated = AuthManager.isAuthenticated
-    
+
+    // Load data on first composition
+    LaunchedEffect(key1 = isAuthenticated) {
+        if (isAuthenticated) {
+            loadUserStats { loadedStats ->
+                stats = loadedStats
+                isLoading = false
+            }
+        } else {
+            isLoading = false
+        }
+    }
+
     if (!isAuthenticated) {
         // If not authenticated, show login prompt
         UnauthenticatedTrackerContent(
@@ -40,17 +65,6 @@ fun TrackerScreen() {
         )
         return
     }
-    
-    // Temporary sample data
-    val stats = PoopStats(
-        currentStreak = 13,
-        longestStreak = 20,
-        todayCount = 2,
-        weeklyStats = listOf(2, 3, 1, 4, 3, 2, 1),
-        averageDuration = 7.5f,
-        averageBristolScale = 4.2f,
-        totalLogs = 145
-    )
 
     Scaffold(
         floatingActionButton = {
@@ -62,45 +76,63 @@ fun TrackerScreen() {
             }
         }
     ) { padding ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .background(Teal)
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp)
         ) {
-            // Screen Title
-            Text(
-                text = "Tracker",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = DarkBrown,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-            
-            // User Profile Section
-            UserProfileSection(userName = AuthManager.currentUserDisplayName ?: "User")
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Today's Stats Card
-            TodayStatsCard(stats = stats)
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Streaks Card
-            StreaksCard(stats = stats)
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Weekly Activity Card
-            WeeklyActivityCard(stats = stats)
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Additional Stats Card
-            AdditionalStatsCard(stats = stats)
+            if (isLoading) {
+                // Loading state
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = DarkBrown
+                )
+            } else {
+                // Content
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
+                        .padding(bottom = 80.dp)
+                ) {
+                    // Screen Title
+                    Text(
+                        text = "Tracker",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = DarkBrown,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    // User Profile Section
+                    UserProfileSection(userName = AuthManager.currentUserDisplayName ?: "User")
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Display stats if available
+                    stats?.let { poopStats ->
+                        // Streaks Card
+                        StreaksCard(stats = poopStats)
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Monthly Calendar
+                        MonthlyCalendarCard(stats = poopStats)
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Weekly Activity Card
+                        WeeklyActivityCard(stats = poopStats)
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Additional Stats Card
+                        AdditionalStatsCard(stats = poopStats)
+                    }
+                }
+            }
         }
     }
 
@@ -108,9 +140,48 @@ fun TrackerScreen() {
         AddPoopLogDialog(
             onDismiss = { showAddDialog = false },
             onConfirm = { poopLog ->
-                showAddDialog = false
+                coroutineScope.launch {
+                    try {
+                        // Add the log to Firebase
+                        FirebaseRepository.addPoopLog(poopLog)
+
+                        // Reload stats
+                        loadUserStats { loadedStats ->
+                            stats = loadedStats
+                        }
+
+                        showAddDialog = false
+                    } catch (e: Exception) {
+                        // Handle error
+                        e.printStackTrace()
+                    }
+                }
             }
         )
+    }
+}
+
+// Function to load user stats
+private suspend fun loadUserStats(onStatsLoaded: (PoopStats) -> Unit) {
+    try {
+        // Get user streaks from Firebase
+        val (currentStreak, longestStreak) = FirebaseRepository.getUserStreaks()
+
+        // Get user pooplogs
+        val poopLogs = FirebaseRepository.getUserPoopLogs()
+
+        // Calculate stats from logs
+        val stats = PoopStats.calculateFromLogs(
+            poopLogs = poopLogs,
+            currentStreak = currentStreak,
+            longestStreak = longestStreak
+        )
+
+        onStatsLoaded(stats)
+    } catch (e: Exception) {
+        // Handle error - return default stats
+        e.printStackTrace()
+        onStatsLoaded(PoopStats())
     }
 }
 
@@ -133,34 +204,34 @@ private fun UnauthenticatedTrackerContent(
             color = DarkBrown,
             modifier = Modifier.padding(bottom = 24.dp)
         )
-        
+
         Icon(
             imageVector = Icons.Default.Lock,
             contentDescription = null,
             tint = DarkBrown,
             modifier = Modifier.size(64.dp)
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Text(
             text = "Sign in to track your poop history",
             style = MaterialTheme.typography.titleMedium,
             color = DarkBrown,
             textAlign = TextAlign.Center
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Text(
             text = "Create an account to save your logs and view statistics across devices",
             style = MaterialTheme.typography.bodyMedium,
             color = DarkBrown.copy(alpha = 0.7f),
             textAlign = TextAlign.Center
         )
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Button(
             onClick = onLoginClick,
             colors = ButtonDefaults.buttonColors(
@@ -198,9 +269,9 @@ private fun UserProfileSection(userName: String) {
                 .clip(CircleShape)
                 .background(DarkBrown)
         )
-        
+
         Spacer(modifier = Modifier.width(12.dp))
-        
+
         Column {
             Text(
                 text = userName,
@@ -217,7 +288,18 @@ private fun UserProfileSection(userName: String) {
 }
 
 @Composable
-private fun TodayStatsCard(stats: PoopStats) {
+private fun MonthlyCalendarCard(stats: PoopStats) {
+    val calendar = Calendar.getInstance()
+    val daysInMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+    val dateFormat = SimpleDateFormat("MMMM yyyy", Locale.getDefault())
+    val monthName = dateFormat.format(calendar.time)
+
+    // Get the first day of month (0 = Sunday, 1 = Monday, etc.)
+    val firstDayCalendar = Calendar.getInstance().apply {
+        set(Calendar.DAY_OF_MONTH, 1)
+    }
+    val firstDayOfMonthOffset = firstDayCalendar.get(Calendar.DAY_OF_WEEK) - 1 // Adjust to 0-based
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
@@ -226,22 +308,61 @@ private fun TodayStatsCard(stats: PoopStats) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Today's Stats",
+                text = "Monthly Calendar",
                 style = MaterialTheme.typography.titleMedium,
-                color = DarkBrown
+                color = DarkBrown,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 16.dp)
             )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
+
+            Text(
+                text = monthName,
+                style = MaterialTheme.typography.titleSmall,
+                color = DarkBrown,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+
+            // Calendar header (S M T W T F S)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceAround
             ) {
-                repeat(6) { hour ->
-                    TimeSlotColumn(
-                        time = "${hour * 4}:00",
-                        count = if (hour == 0) stats.todayCount else 0
+                listOf("S", "M", "T", "W", "T", "F", "S").forEach { day ->
+                    Text(
+                        text = day,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = DarkBrown,
+                        modifier = Modifier.width(32.dp),
+                        textAlign = TextAlign.Center
                     )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Calendar grid
+            val totalCells = firstDayOfMonthOffset + daysInMonth
+            val rows = (totalCells + 6) / 7 // Ceiling division
+
+            for (row in 0 until rows) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    for (col in 0 until 7) {
+                        val index = row * 7 + col
+                        val day = index - firstDayOfMonthOffset + 1
+
+                        if (day in 1..daysInMonth) {
+                            val hasVisit = stats.monthlyVisitDays.contains(day)
+                            CalendarDay(day = day, hasVisit = hasVisit)
+                        } else {
+                            // Empty cell
+                            Spacer(modifier = Modifier.width(32.dp))
+                        }
+                    }
                 }
             }
         }
@@ -249,26 +370,20 @@ private fun TodayStatsCard(stats: PoopStats) {
 }
 
 @Composable
-private fun TimeSlotColumn(time: String, count: Int) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
+private fun CalendarDay(day: Int, hasVisit: Boolean) {
+    Box(
+        modifier = Modifier
+            .size(32.dp)
+            .clip(CircleShape)
+            .background(if (hasVisit) DarkBrown else Color.Transparent)
+            .padding(4.dp),
+        contentAlignment = Alignment.Center
     ) {
         Text(
-            text = count.toString(),
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = DarkBrown
-        )
-        CircularProgressIndicator(
-            progress = count.toFloat() / 5f,
-            modifier = Modifier.size(32.dp),
-            color = DarkBrown,
-            trackColor = LightBrown
-        )
-        Text(
-            text = time,
-            style = MaterialTheme.typography.bodySmall,
-            color = DarkBrown.copy(alpha = 0.7f)
+            text = day.toString(),
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (hasVisit) White else DarkBrown,
+            textAlign = TextAlign.Center
         )
     }
 }
@@ -282,20 +397,55 @@ private fun StreaksCard(stats: PoopStats) {
         shadowElevation = 4.dp
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+            // Current Streak (more prominent)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Current Streak", color = DarkBrown)
-                Text("${stats.currentStreak} Days", fontWeight = FontWeight.Bold, color = DarkBrown)
+                Text(
+                    text = "Current Streak",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = DarkBrown,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "${stats.currentStreak}",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = DarkBrown,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "days",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = DarkBrown
+                )
             }
-            Spacer(modifier = Modifier.height(8.dp))
+
+            Divider(
+                color = DarkBrown.copy(alpha = 0.3f),
+                thickness = 1.dp,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            // Longest Streak (less prominent)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Longest Streak", color = DarkBrown)
-                Text("${stats.longestStreak} Days", fontWeight = FontWeight.Bold, color = DarkBrown)
+                Text(
+                    text = "Longest Streak",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = DarkBrown
+                )
+                Text(
+                    text = "${stats.longestStreak} days",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = DarkBrown
+                )
             }
         }
     }
@@ -326,9 +476,9 @@ private fun WeeklyActivityCard(stats: PoopStats) {
                     color = DarkBrown.copy(alpha = 0.7f)
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -339,15 +489,15 @@ private fun WeeklyActivityCard(stats: PoopStats) {
                     Box(
                         modifier = Modifier
                             .width(32.dp)
-                            .height((100 * (value.toFloat() / maxValue)).dp)
+                            .height((100 * (value.toFloat() / maxValue.coerceAtLeast(1))).dp)
                             .clip(RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
                             .background(DarkBrown)
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -379,9 +529,10 @@ private fun AdditionalStatsCard(stats: PoopStats) {
                 color = DarkBrown,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            
-            StatRow("Average Duration", "${stats.averageDuration} min")
-            StatRow("Average Bristol Scale", "Type ${stats.averageBristolScale}")
+
+            StatRow("Today's Count", "${stats.todayCount}")
+            StatRow("Average Duration", "${stats.averageDuration.toInt()} min")
+            StatRow("Average Bristol Scale", "Type ${String.format("%.1f", stats.averageBristolScale)}")
             StatRow("Total Logs", "${stats.totalLogs}")
         }
     }
