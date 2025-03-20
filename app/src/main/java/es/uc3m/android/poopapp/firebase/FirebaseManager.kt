@@ -10,6 +10,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import es.uc3m.android.poopapp.data.model.PoopLog
 import es.uc3m.android.poopapp.data.model.User
+import es.uc3m.android.poopapp.data.model.League
+import es.uc3m.android.poopapp.data.model.LeaderboardEntry
+
+
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -197,6 +201,62 @@ class FirebaseManager {
             }
             .addOnFailureListener { e ->
                 println(" Error saving poop log: ${e.message}")
+                onError(e.message ?: "Unknown error")
+            }
+    }
+    suspend fun getLeaderboardEntries(leagueId: String): List<LeaderboardEntry> {
+        return try {
+            firestore.collection("leaderboard_entries")
+                .whereEqualTo("leagueId", leagueId)
+                .get()
+                .await()
+                .toObjects(LeaderboardEntry::class.java)
+        } catch (e: Exception) {
+            println("❌ Error fetching leaderboard entries: ${e.message}")
+            emptyList()
+        }
+    }
+
+    suspend fun getLeagues(): List<League> {
+        return try {
+            firestore.collection("leagues")
+                .get()
+                .await()
+                .toObjects(League::class.java) // Ensure correct type conversion
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+
+    fun createLeague(
+        name: String,
+        createdBy: String,
+        onSuccess: (League) -> Unit, // 🔥 Now returns the created League
+        onError: (String) -> Unit
+    ) {
+        val leagueData = hashMapOf(
+            "name" to name,
+            "createdBy" to createdBy,
+            "members" to listOf(createdBy),
+            "createdAt" to Timestamp.now(),
+            "isPrivate" to true
+        )
+
+        firestore.collection("leagues")
+            .add(leagueData)
+            .addOnSuccessListener { documentRef ->
+                val newLeague = League(
+                    id = documentRef.id, // ✅ Get Firestore-generated ID
+                    name = name,
+                    createdBy = createdBy,
+                    members = listOf(createdBy),
+                    createdAt = Timestamp.now(),
+                    isPrivate = true
+                )
+                onSuccess(newLeague) // ✅ Pass the League object
+            }
+            .addOnFailureListener { e ->
                 onError(e.message ?: "Unknown error")
             }
     }

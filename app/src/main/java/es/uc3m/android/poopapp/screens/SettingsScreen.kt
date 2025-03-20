@@ -2,6 +2,11 @@ package es.uc3m.android.poopapp.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -20,112 +25,125 @@ fun SettingsScreen(
     onSignInClick: () -> Unit,
     onSignOutClick: () -> Unit
 ) {
-    Column(
+    // A state for the LazyColumn (optional: used for remembering scroll position)
+    val lazyListState = rememberLazyListState()
+
+    LazyColumn(
+        state = lazyListState,
         modifier = Modifier
             .fillMaxSize()
             .background(Teal)
-            .padding(16.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)  // spacing between items
     ) {
         // Screen Title
-        Text(
-            text = "Settings",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = DarkBrown,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        
-        // Profile Section
-        if (isAuthenticated && username != null) {
-            ProfileSection(username = username, onSignOutClick = onSignOutClick)
-        } else {
-            SignInPrompt(onSignInClick = onSignInClick)
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // General Settings
-        Text(
-            text = "General Settings",
-            style = MaterialTheme.typography.titleLarge,
-            color = DarkBrown
-        )
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        SettingsCard {
-            // Notifications
-            SettingItem(
-                icon = Icons.Default.Notifications,
-                title = "Notifications",
-                subtitle = "Manage notification preferences"
+        item {
+            Text(
+                text = "Settings",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = DarkBrown
             )
-            
-            Divider(modifier = Modifier.padding(vertical = 8.dp))
-            
-            // Dark Mode
-            var darkModeEnabled by remember { mutableStateOf(false) }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Dark Mode",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
-                )
-                
-                Switch(
-                    checked = darkModeEnabled,
-                    onCheckedChange = { darkModeEnabled = it },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = DarkBrown,
-                        checkedTrackColor = LightBrown,
-                        uncheckedThumbColor = Gray,
-                        uncheckedTrackColor = LightGray
-                    )
-                )
+        }
+
+        // Profile Section
+        item {
+            if (isAuthenticated && username != null) {
+                ProfileSection(username = username, onSignOutClick = onSignOutClick)
+            } else {
+                SignInPrompt(onSignInClick = onSignInClick)
             }
         }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // Account Settings (only if authenticated)
-        if (isAuthenticated) {
+
+        // General Settings header
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Account Settings",
+                text = "General Settings",
                 style = MaterialTheme.typography.titleLarge,
                 color = DarkBrown
             )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
+        }
+
+        // General Settings card
+        item {
             SettingsCard {
+                // Notifications
                 SettingItem(
-                    icon = Icons.Default.Person,
-                    title = "Profile",
-                    subtitle = "Edit your profile information"
+                    icon = Icons.Default.Notifications,
+                    title = "Notifications",
+                    subtitle = "Manage notification preferences"
                 )
-                
+
                 Divider(modifier = Modifier.padding(vertical = 8.dp))
-                
-                SettingItem(
-                    icon = Icons.Default.Lock,
-                    title = "Privacy",
-                    subtitle = "Manage your privacy settings"
+
+                // Dark Mode
+                var darkModeEnabled by remember { mutableStateOf(false) }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Dark Mode",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium
+                    )
+
+                    Switch(
+                        checked = darkModeEnabled,
+                        onCheckedChange = { darkModeEnabled = it },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = DarkBrown,
+                            checkedTrackColor = LightBrown,
+                            uncheckedThumbColor = Gray,
+                            uncheckedTrackColor = LightGray
+                        )
+                    )
+                }
+            }
+        }
+
+        // Account Settings (only if authenticated)
+        if (isAuthenticated) {
+            // Account Settings header
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Account Settings",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = DarkBrown
                 )
-                
-                Divider(modifier = Modifier.padding(vertical = 8.dp))
-                
-                SettingItem(
-                    icon = Icons.Default.Delete,
-                    title = "Delete Account",
-                    subtitle = "Permanently delete your account",
-                    iconTint = MaterialTheme.colorScheme.error
-                )
+            }
+
+            // Account Settings card
+            item {
+                SettingsCard {
+                    SettingItem(
+                        icon = Icons.Default.Person,
+                        title = "Profile",
+                        subtitle = "Edit your profile information"
+                    )
+
+                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+                    SettingItem(
+                        icon = Icons.Default.Lock,
+                        title = "Privacy",
+                        subtitle = "Manage your privacy settings"
+                    )
+
+                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+                    SettingItem(
+                        icon = Icons.Default.Delete,
+                        title = "Delete Account",
+                        subtitle = "Permanently delete your account",
+                        iconTint = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
@@ -141,9 +159,7 @@ private fun SettingsCard(
         color = White,
         shadowElevation = 4.dp
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             content()
         }
     }
@@ -168,9 +184,9 @@ private fun SettingItem(
             tint = iconTint,
             modifier = Modifier.size(24.dp)
         )
-        
+
         Spacer(modifier = Modifier.width(16.dp))
-        
+
         Column {
             Text(
                 text = title,
@@ -198,9 +214,7 @@ private fun ProfileSection(
         color = White,
         shadowElevation = 4.dp
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -220,9 +234,9 @@ private fun ProfileSection(
                             .size(32.dp)
                     )
                 }
-                
+
                 Spacer(modifier = Modifier.width(16.dp))
-                
+
                 Column {
                     Text(
                         text = username,
@@ -237,9 +251,9 @@ private fun ProfileSection(
                     )
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Button(
                 onClick = onSignOutClick,
                 colors = ButtonDefaults.buttonColors(
@@ -280,26 +294,26 @@ private fun SignInPrompt(
                 tint = DarkBrown,
                 modifier = Modifier.size(64.dp)
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Text(
                 text = "Sign in to access all features",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
                 color = DarkBrown
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Text(
                 text = "Track your progress, sync across devices, and more",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Button(
                 onClick = onSignInClick,
                 colors = ButtonDefaults.buttonColors(
@@ -318,4 +332,4 @@ private fun SignInPrompt(
             }
         }
     }
-} 
+}

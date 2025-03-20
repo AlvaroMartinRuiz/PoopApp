@@ -108,7 +108,6 @@ fun TrackerScreen() {
         AddPoopLogDialog(
             onDismiss = { showAddDialog = false },
             onConfirm = { poopLog ->
-                // TODO: Handle saving poop log
                 showAddDialog = false
             }
         )

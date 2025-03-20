@@ -54,7 +54,7 @@ fun AddPoopLogDialog(
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                
+
                 Text(
                     text = BristolType.values()[bristolScale - 1].description,
                     style = MaterialTheme.typography.bodyMedium,
@@ -132,31 +132,31 @@ fun AddPoopLogDialog(
                     Button(
                         onClick = {
 
-                                val poopLog = PoopLog(
-                                    timestamp = Timestamp.now(), // ✅ Assign current Firestore timestamp
-                                    bristolScale = bristolScale,
-                                    duration = duration,
-                                    strain = strain,
-                                    completeness = completeness,
-                                    notes = notes
-                                )
+                            val poopLog = PoopLog(
+                                timestamp = Timestamp.now(), // ✅ Assign current Firestore timestamp
+                                bristolScale = bristolScale,
+                                duration = duration,
+                                strain = strain,
+                                completeness = completeness,
+                                notes = notes
+                            )
 
                             onConfirm(poopLog)
                             val currentUser = FirebaseAuth.getInstance().currentUser
                             if (currentUser != null) {
-                                    FirebaseManager().savePoopLog(
-                                        userId = currentUser.uid,
-                                        poopLog = poopLog,
-                                        onSuccess = {
-                                            println(" Poop log saved successfully!")
-                                        },
-                                        onError = { error ->
-                                            println(" Error saving poop log: $error")
-                                        }
-                                    )
-                                } else {
-                                    println(" No authenticated user found.")
-                                }
+                                FirebaseManager().savePoopLog(
+                                    userId = currentUser.uid,
+                                    poopLog = poopLog,
+                                    onSuccess = {
+                                        println(" Poop log saved successfully!")
+                                    },
+                                    onError = { error ->
+                                        println(" Error saving poop log: $error")
+                                    }
+                                )
+                            } else {
+                                println(" No authenticated user found.")
+                            }
                             onDismiss()
                         }
                     ) {
