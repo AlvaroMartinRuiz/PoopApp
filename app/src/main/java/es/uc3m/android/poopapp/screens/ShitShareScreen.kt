@@ -106,12 +106,27 @@ fun ShitShareScreen(
                 coroutineScope.launch {
                     val league = firebaseManager.getLeagueByInviteCode(code)
                     if (league != null) {
-                        firebaseManager.joinLeague(userId, league)
-                        // Refresh leagues
-                        leagues.clear()
-                        leagues.addAll(firebaseManager.getLeaguesForUser(userId))
+                        firebaseManager.joinLeague(
+                            userId = userId, 
+                            league = league,
+                            onSuccess = {
+                                // Only refresh leagues after successful join
+                                coroutineScope.launch {
+                                    leagues.clear()
+                                    leagues.addAll(firebaseManager.getLeaguesForUser(userId))
+                                }
+                                showJoinLeagueDialog = false
+                            },
+                            onError = { errorMsg ->
+                                // Handle error (ideally show to user)
+                                println("Error joining league: $errorMsg")
+                                showJoinLeagueDialog = false
+                            }
+                        )
+                    } else {
+                        // League not found with that code
+                        showJoinLeagueDialog = false
                     }
-                    showJoinLeagueDialog = false
                 }
             }
         )

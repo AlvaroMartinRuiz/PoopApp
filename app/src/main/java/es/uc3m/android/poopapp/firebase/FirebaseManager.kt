@@ -191,9 +191,6 @@ class FirebaseManager {
             }
     }
 
-
-
-
     fun createLeague(
         name: String,
         createdBy: String,
@@ -249,27 +246,6 @@ class FirebaseManager {
         }
     }
 
-     suspend fun getLeagues(): List<League> {
-        return try {
-            firestore.collection("leagues")
-                .get()
-                .await()
-                .toObjects(League::class.java) // Ensure correct type conversion
-        } catch (e: Exception) {
-            emptyList()
-        }
-    }
-
-    fun createLeague(name: String, createdBy: String) {
-        val league = League(
-            id = "", // Let Firestore auto-generate
-            name = name,
-            createdBy = createdBy,
-            members = listOf(createdBy)
-        )
-        firestore.collection("leagues").add(league)
-    }
-
     suspend fun getLeagueByInviteCode(code: String): League? {
         return try {
             val result = firestore.collection("leagues")
@@ -287,10 +263,23 @@ class FirebaseManager {
         }
     }
 
-    fun joinLeague(userId: String, league: League) {
+    fun joinLeague(userId: String, league: League, onSuccess: () -> Unit = {}, onError: (String) -> Unit = {}) {
+        // First check if user is already a member
+        if (league.members.contains(userId)) {
+            onSuccess()
+            return
+        }
+        
         val updatedMembers = league.members + userId
         firestore.collection("leagues").document(league.id)
             .update("members", updatedMembers)
+            .addOnSuccessListener {
+                // Call the success callback when the update is completed
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                onError(e.message ?: "Failed to join league")
+            }
     }
     fun updateUserProfile(
         user: User,
