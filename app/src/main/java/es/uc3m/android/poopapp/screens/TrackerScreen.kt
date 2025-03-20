@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.google.firebase.auth.FirebaseAuth
 import es.uc3m.android.poopapp.data.model.PoopLog
 import es.uc3m.android.poopapp.data.model.PoopStats
 import es.uc3m.android.poopapp.firebase.AuthManager
@@ -165,6 +166,7 @@ fun TrackerScreen() {
 private suspend fun loadUserStats(onStatsLoaded: (PoopStats) -> Unit) {
     try {
         // Get user streaks from Firebase
+        val currentUser = FirebaseAuth.getInstance().currentUser
         val (currentStreak, longestStreak) = FirebaseRepository.getUserStreaks()
 
         // Get user pooplogs

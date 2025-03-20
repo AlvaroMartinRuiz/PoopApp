@@ -48,6 +48,7 @@ import es.uc3m.android.poopapp.ui.theme.PoopAppTheme
 import es.uc3m.android.poopapp.ui.theme.White
 import es.uc3m.android.poopapp.firebase.FirebaseManager
 import com.google.firebase.auth.FirebaseAuth
+import es.uc3m.android.poopapp.firebase.FirebaseRepository
 
 
 class MainActivity : ComponentActivity() {
