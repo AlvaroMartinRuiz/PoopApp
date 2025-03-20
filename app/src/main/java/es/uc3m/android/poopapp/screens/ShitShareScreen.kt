@@ -10,10 +10,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.uc3m.android.poopapp.firebase.FirebaseManager
 import es.uc3m.android.poopapp.data.model.League
 import es.uc3m.android.poopapp.data.model.LeaderboardEntry
+import es.uc3m.android.poopapp.ui.theme.poopAppColors
 import kotlinx.coroutines.launch
 import es.uc3m.android.poopapp.screens.LeaderboardView
 import es.uc3m.android.poopapp.ui.components.CreateLeagueDialog
@@ -50,10 +52,12 @@ fun ShitShareScreen(
     } else {
         // Main ShitShare Screen
         Column(modifier = Modifier.fillMaxSize()) {
-            // Title: "Your Leagues"
+            // Title: "ShitShare" with consistent typography
             Text(
-                text = "Your Leagues",
-                style = MaterialTheme.typography.titleLarge,
+                text = "ShitShare",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(16.dp)
             )
 
@@ -67,17 +71,29 @@ fun ShitShareScreen(
                 }
             }
 
-            // Bottom Buttons: Create League & Join League
+            // Bottom Buttons: Create League & Join League with consistent styling
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Button(onClick = { showCreateLeagueDialog = true }) {
+                Button(
+                    onClick = { showCreateLeagueDialog = true },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.poopAppColors.buttonBackground,
+                        contentColor = MaterialTheme.poopAppColors.buttonContent
+                    )
+                ) {
                     Text("Create League")
                 }
-                Button(onClick = { showJoinLeagueDialog = true }) {
+                Button(
+                    onClick = { showJoinLeagueDialog = true },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.poopAppColors.buttonBackground,
+                        contentColor = MaterialTheme.poopAppColors.buttonContent
+                    )
+                ) {
                     Text("Join League via Code")
                 }
             }
@@ -146,16 +162,25 @@ private fun LeagueCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        onClick = onSelect
+        onClick = onSelect,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.poopAppColors.staticCardBackground
+        )
     ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Text(text = league.name)
+            Text(
+                text = league.name,
+                color = MaterialTheme.poopAppColors.textPrimary
+            )
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "${league.members.size} members")
+            Text(
+                text = "${league.members.size} members",
+                color = MaterialTheme.poopAppColors.textSecondary
+            )
         }
     }
 }
@@ -186,10 +211,17 @@ fun LeagueDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(league.name) },
+                title = { Text(
+                    text = league.name,
+                    color = MaterialTheme.colorScheme.onBackground
+                ) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
                     }
                 }
             )
@@ -205,6 +237,7 @@ fun LeagueDetailScreen(
                 Text(
                     text = "Invite Code: ${league.inviteCode}",
                     style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(16.dp)
                 )
             }
@@ -213,6 +246,7 @@ fun LeagueDetailScreen(
             Text(
                 text = "Leaderboard",
                 style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
 
@@ -243,25 +277,41 @@ fun CreateLeagueDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create New League") },
+        containerColor = MaterialTheme.poopAppColors.popupCardBackground,
+        title = { Text("Create New League", color = MaterialTheme.poopAppColors.textPrimary) },
         text = {
             OutlinedTextField(
                 value = leagueName,
                 onValueChange = { leagueName = it },
-                label = { Text("League Name") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("League Name", color = MaterialTheme.poopAppColors.textPrimary) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                    unfocusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                    focusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                    unfocusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                    cursorColor = MaterialTheme.poopAppColors.textPrimary
+                )
             )
         },
         confirmButton = {
             TextButton(
                 onClick = { onCreateLeague(leagueName) },
-                enabled = leagueName.isNotBlank()
+                enabled = leagueName.isNotBlank(),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.poopAppColors.textPrimary
+                )
             ) {
                 Text("Create")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.poopAppColors.textPrimary
+                )
+            ) {
                 Text("Cancel")
             }
         }
@@ -280,25 +330,41 @@ fun JoinLeagueDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Join League") },
+        containerColor = MaterialTheme.poopAppColors.popupCardBackground,
+        title = { Text("Join League", color = MaterialTheme.poopAppColors.textPrimary) },
         text = {
             OutlinedTextField(
                 value = inviteCode,
                 onValueChange = { inviteCode = it },
-                label = { Text("Enter Invite Code") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("Enter Invite Code", color = MaterialTheme.poopAppColors.textPrimary) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                    unfocusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                    focusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                    unfocusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                    cursorColor = MaterialTheme.poopAppColors.textPrimary
+                )
             )
         },
         confirmButton = {
             TextButton(
                 onClick = { onJoinLeague(inviteCode) },
-                enabled = inviteCode.isNotBlank()
+                enabled = inviteCode.isNotBlank(),
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.poopAppColors.textPrimary
+                )
             ) {
                 Text("Join")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.poopAppColors.textPrimary
+                )
+            ) {
                 Text("Cancel")
             }
         }

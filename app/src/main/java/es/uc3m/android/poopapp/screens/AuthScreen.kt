@@ -35,6 +35,7 @@ import androidx.compose.ui.window.Dialog
 import es.uc3m.android.poopapp.R
 import es.uc3m.android.poopapp.firebase.FirebaseManager
 import es.uc3m.android.poopapp.ui.theme.*
+import es.uc3m.android.poopapp.ui.theme.poopAppColors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -68,7 +69,7 @@ fun AuthScreen(
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.poopAppColors.popupCardBackground
             )
         ) {
             Column(
@@ -99,7 +100,7 @@ fun AuthScreen(
                     text = if (isLogin) "Welcome Back!" else "Join PoopApp",
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
-                    color = DarkBrown
+                    color = MaterialTheme.poopAppColors.textPrimary
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -108,7 +109,7 @@ fun AuthScreen(
                 Text(
                     text = if (isLogin) "Sign in to continue" else "Create your account",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Gray,
+                    color = MaterialTheme.poopAppColors.textSecondary,
                     textAlign = TextAlign.Center
                 )
 
@@ -129,8 +130,14 @@ fun AuthScreen(
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
-                        label = { Text("Username") },
-                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username") },
+                        label = { Text("Username", color = MaterialTheme.poopAppColors.textPrimary) },
+                        leadingIcon = { 
+                            Icon(
+                                Icons.Default.Person, 
+                                contentDescription = "Username",
+                                tint = MaterialTheme.poopAppColors.textPrimary
+                            ) 
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
@@ -142,9 +149,13 @@ fun AuthScreen(
                             }
                         ),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = DarkBrown,
-                            focusedLabelColor = DarkBrown,
-                            unfocusedBorderColor = LightBrown
+                            focusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                            unfocusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                            focusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                            unfocusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                            focusedBorderColor = MaterialTheme.poopAppColors.buttonBackground,
+                            unfocusedBorderColor = MaterialTheme.poopAppColors.buttonBackground,
+                            cursorColor = MaterialTheme.poopAppColors.textPrimary
                         )
                     )
 

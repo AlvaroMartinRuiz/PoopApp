@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import es.uc3m.android.poopapp.data.model.League
 import es.uc3m.android.poopapp.firebase.FirebaseManager
+import es.uc3m.android.poopapp.ui.theme.poopAppColors
 import kotlinx.coroutines.launch
 
 @Composable
@@ -24,17 +25,30 @@ fun CreateLeagueDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create New League") },
+        containerColor = MaterialTheme.poopAppColors.popupCardBackground,
+        title = { Text("Create New League", color = MaterialTheme.poopAppColors.textPrimary) },
         text = {
             Column {
                 OutlinedTextField(
                     value = leagueName,
                     onValueChange = { leagueName = it },
-                    label = { Text("League Name") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("League Name", color = MaterialTheme.poopAppColors.textPrimary) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        unfocusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        unfocusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        cursorColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedBorderColor = MaterialTheme.poopAppColors.buttonBackground,
+                        unfocusedBorderColor = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 )
                 if (isLoading) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        color = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 }
             }
         },
@@ -60,13 +74,21 @@ fun CreateLeagueDialog(
                         }
                     }
                 },
-                enabled = leagueName.isNotBlank() && !isLoading
+                enabled = leagueName.isNotBlank() && !isLoading,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.poopAppColors.textPrimary
+                )
             ) {
                 Text("Create")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.poopAppColors.textPrimary
+                )
+            ) {
                 Text("Cancel")
             }
         }

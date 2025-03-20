@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import es.uc3m.android.poopapp.data.model.BristolType
 import es.uc3m.android.poopapp.data.model.PoopLog
+import es.uc3m.android.poopapp.ui.theme.poopAppColors
 import java.util.Date
 import es.uc3m.android.poopapp.firebase.FirebaseRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -34,7 +35,7 @@ fun AddPoopLogDialog(
                 .fillMaxWidth()
                 .padding(16.dp),
             shape = MaterialTheme.shapes.large,
-            color = MaterialTheme.colorScheme.surface
+            color = MaterialTheme.poopAppColors.popupCardBackground
         ) {
             Column(
                 modifier = Modifier
@@ -44,21 +45,24 @@ fun AddPoopLogDialog(
                 Text(
                     text = "Add Poop Log",
                     style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    color = MaterialTheme.poopAppColors.textPrimary
                 )
 
                 // Bristol Scale Selection
                 Text(
                     text = "Bristol Stool Scale",
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    color = MaterialTheme.poopAppColors.textPrimary
                 )
-
+                
                 Text(
                     text = BristolType.values()[bristolScale - 1].description,
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    color = MaterialTheme.poopAppColors.textPrimary
                 )
 
                 Slider(
@@ -66,56 +70,84 @@ fun AddPoopLogDialog(
                     onValueChange = { bristolScale = it.toInt() },
                     valueRange = 1f..7f,
                     steps = 5,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.poopAppColors.buttonBackground,
+                        activeTrackColor = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 )
 
                 // Duration Slider
                 Text(
                     text = "Duration (minutes): $duration",
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.poopAppColors.textPrimary
                 )
                 Slider(
                     value = duration.toFloat(),
                     onValueChange = { duration = it.toInt() },
                     valueRange = 1f..30f,
                     steps = 29,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.poopAppColors.buttonBackground,
+                        activeTrackColor = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 )
 
                 // Strain Level
                 Text(
                     text = "Strain Level: $strain",
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.poopAppColors.textPrimary
                 )
                 Slider(
                     value = strain.toFloat(),
                     onValueChange = { strain = it.toInt() },
                     valueRange = 1f..5f,
                     steps = 3,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.poopAppColors.buttonBackground,
+                        activeTrackColor = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 )
 
                 // Completeness
                 Text(
                     text = "Completeness: $completeness",
-                    style = MaterialTheme.typography.bodyLarge
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.poopAppColors.textPrimary
                 )
                 Slider(
                     value = completeness.toFloat(),
                     onValueChange = { completeness = it.toInt() },
                     valueRange = 1f..5f,
                     steps = 3,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.poopAppColors.buttonBackground,
+                        activeTrackColor = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 )
 
                 // Notes
                 OutlinedTextField(
                     value = notes,
                     onValueChange = { notes = it },
-                    label = { Text("Notes (optional)") },
+                    label = { Text("Notes (optional)", color = MaterialTheme.poopAppColors.textPrimary) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp)
+                        .padding(bottom = 16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        unfocusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        unfocusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        cursorColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedBorderColor = MaterialTheme.poopAppColors.buttonBackground,
+                        unfocusedBorderColor = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 )
 
                 // Buttons
@@ -124,7 +156,12 @@ fun AddPoopLogDialog(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TextButton(onClick = onDismiss) {
+                    TextButton(
+                        onClick = onDismiss,
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.poopAppColors.textPrimary
+                        )
+                    ) {
                         Text("Cancel")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
@@ -155,7 +192,11 @@ fun AddPoopLogDialog(
                             } else {
                                 println(" No authenticated user found.")
                             }
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.poopAppColors.buttonBackground,
+                            contentColor = MaterialTheme.poopAppColors.buttonContent
+                        )
                     ) {
                         Text("Save")
                     }

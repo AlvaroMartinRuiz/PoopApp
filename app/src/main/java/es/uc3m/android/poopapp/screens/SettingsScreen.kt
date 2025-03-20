@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import es.uc3m.android.poopapp.ui.theme.*
+import es.uc3m.android.poopapp.ui.theme.poopAppColors
 import es.uc3m.android.poopapp.firebase.AuthManager
 import es.uc3m.android.poopapp.firebase.FirebaseManager
 import es.uc3m.android.poopapp.data.model.User
@@ -40,7 +41,7 @@ fun SettingsScreen(
         state = lazyListState,
         modifier = Modifier
             .fillMaxSize()
-            .background(Teal)
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -49,7 +50,7 @@ fun SettingsScreen(
                 text = "Settings",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = DarkBrown
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
@@ -71,7 +72,7 @@ fun SettingsScreen(
                 Text(
                     text = "Account Settings",
                     style = MaterialTheme.typography.titleLarge,
-                    color = DarkBrown
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -111,7 +112,7 @@ fun SettingsScreen(
             Text(
                 text = "General Settings",
                 style = MaterialTheme.typography.titleLarge,
-                color = DarkBrown
+                color = MaterialTheme.colorScheme.onBackground
             )
         }
 
@@ -128,17 +129,18 @@ fun SettingsScreen(
                     Text(
                         text = "Dark Mode",
                         style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.poopAppColors.textPrimary
                     )
 
                     Switch(
                         checked = darkModeEnabled,
                         onCheckedChange = { darkModeEnabled = it },
                         colors = SwitchDefaults.colors(
-                            checkedThumbColor = DarkBrown,
-                            checkedTrackColor = LightBrown,
-                            uncheckedThumbColor = Gray,
-                            uncheckedTrackColor = LightGray
+                            checkedThumbColor = MaterialTheme.poopAppColors.buttonBackground,
+                            checkedTrackColor = MaterialTheme.poopAppColors.buttonBackground.copy(alpha = 0.7f),
+                            uncheckedThumbColor = MaterialTheme.colorScheme.surfaceVariant,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f)
                         )
                     )
                 }
@@ -185,7 +187,7 @@ private fun SettingsCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        color = White,
+        color = MaterialTheme.poopAppColors.staticCardBackground,
         shadowElevation = 4.dp
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -199,7 +201,7 @@ private fun SettingItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    iconTint: androidx.compose.ui.graphics.Color = DarkBrown,
+    iconTint: androidx.compose.ui.graphics.Color = MaterialTheme.poopAppColors.textPrimary,
     onClick: () -> Unit = {}
 ) {
     Row(
@@ -223,12 +225,12 @@ private fun SettingItem(
                 text = title,
                 style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Medium,
-                color = DarkBrown
+                color = MaterialTheme.poopAppColors.textPrimary
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                color = MaterialTheme.poopAppColors.textSecondary
             )
         }
     }
@@ -243,7 +245,7 @@ private fun ProfileSection(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        color = White,
+        color = MaterialTheme.poopAppColors.staticCardBackground,
         shadowElevation = 4.dp
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -254,12 +256,12 @@ private fun ProfileSection(
                 Surface(
                     modifier = Modifier.size(64.dp),
                     shape = MaterialTheme.shapes.medium,
-                    color = DarkBrown
+                    color = MaterialTheme.poopAppColors.buttonBackground
                 ) {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = null,
-                        tint = White,
+                        tint = MaterialTheme.poopAppColors.buttonContent,
                         modifier = Modifier
                             .padding(16.dp)
                             .size(32.dp)
@@ -273,12 +275,12 @@ private fun ProfileSection(
                         text = username,
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = DarkBrown
+                        color = MaterialTheme.poopAppColors.textPrimary
                     )
                     Text(
                         text = "Edit Profile",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.poopAppColors.buttonBackground,
                         modifier = Modifier.clickable { onEditProfileClick() }
                     )
                 }
@@ -306,7 +308,7 @@ private fun SignInPrompt(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
-        color = White,
+        color = MaterialTheme.poopAppColors.staticCardBackground,
         shadowElevation = 4.dp
     ) {
         Column(
@@ -316,7 +318,7 @@ private fun SignInPrompt(
             Icon(
                 imageVector = Icons.Default.AccountCircle,
                 contentDescription = null,
-                tint = DarkBrown,
+                tint = MaterialTheme.poopAppColors.textPrimary,
                 modifier = Modifier.size(64.dp)
             )
 
@@ -326,7 +328,7 @@ private fun SignInPrompt(
                 text = "Sign in to access all features",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Medium,
-                color = DarkBrown
+                color = MaterialTheme.poopAppColors.textPrimary
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -334,7 +336,7 @@ private fun SignInPrompt(
             Text(
                 text = "Track your progress, sync across devices, and more",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                color = MaterialTheme.poopAppColors.textSecondary
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -342,8 +344,8 @@ private fun SignInPrompt(
             Button(
                 onClick = onSignInClick,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = LightBrown,
-                    contentColor = DarkBrown
+                    containerColor = MaterialTheme.poopAppColors.buttonBackground,
+                    contentColor = MaterialTheme.poopAppColors.buttonContent
                 ),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -371,7 +373,8 @@ private fun EditProfileDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Profile") },
+        containerColor = MaterialTheme.poopAppColors.popupCardBackground,
+        title = { Text("Edit Profile", color = MaterialTheme.poopAppColors.textPrimary) },
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -380,14 +383,32 @@ private fun EditProfileDialog(
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
-                    label = { Text("Username") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Username", color = MaterialTheme.poopAppColors.textPrimary) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        unfocusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        unfocusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        cursorColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedBorderColor = MaterialTheme.poopAppColors.buttonBackground,
+                        unfocusedBorderColor = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 )
                 OutlinedTextField(
                     value = currentPassword,
                     onValueChange = { currentPassword = it },
-                    label = { Text("Current Password") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Current Password", color = MaterialTheme.poopAppColors.textPrimary) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        unfocusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        unfocusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        cursorColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedBorderColor = MaterialTheme.poopAppColors.buttonBackground,
+                        unfocusedBorderColor = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 )
                 if (showError) {
                     Text(
@@ -407,13 +428,21 @@ private fun EditProfileDialog(
                     } else {
                         onSave(username)
                     }
-                }
+                },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.poopAppColors.textPrimary
+                )
             ) {
                 Text("Save")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.poopAppColors.textPrimary
+                )
+            ) {
                 Text("Cancel")
             }
         }
@@ -433,7 +462,8 @@ private fun ChangePasswordDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Change Password") },
+        containerColor = MaterialTheme.poopAppColors.popupCardBackground,
+        title = { Text("Change Password", color = MaterialTheme.poopAppColors.textPrimary) },
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -442,20 +472,47 @@ private fun ChangePasswordDialog(
                 OutlinedTextField(
                     value = currentPassword,
                     onValueChange = { currentPassword = it },
-                    label = { Text("Current Password") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Current Password", color = MaterialTheme.poopAppColors.textPrimary) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        unfocusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        unfocusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        cursorColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedBorderColor = MaterialTheme.poopAppColors.buttonBackground,
+                        unfocusedBorderColor = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 )
                 OutlinedTextField(
                     value = newPassword,
                     onValueChange = { newPassword = it },
-                    label = { Text("New Password") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("New Password", color = MaterialTheme.poopAppColors.textPrimary) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        unfocusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        unfocusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        cursorColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedBorderColor = MaterialTheme.poopAppColors.buttonBackground,
+                        unfocusedBorderColor = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 )
                 OutlinedTextField(
                     value = confirmPassword,
                     onValueChange = { confirmPassword = it },
-                    label = { Text("Confirm New Password") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Confirm New Password", color = MaterialTheme.poopAppColors.textPrimary) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        unfocusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        unfocusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        cursorColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedBorderColor = MaterialTheme.poopAppColors.buttonBackground,
+                        unfocusedBorderColor = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 )
                 if (showError) {
                     Text(
@@ -478,13 +535,21 @@ private fun ChangePasswordDialog(
                     } else {
                         onSave(newPassword)
                     }
-                }
+                },
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.poopAppColors.textPrimary
+                )
             ) {
                 Text("Save")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.poopAppColors.textPrimary
+                )
+            ) {
                 Text("Cancel")
             }
         }
@@ -502,18 +567,31 @@ private fun DeleteAccountDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Delete Account") },
+        containerColor = MaterialTheme.poopAppColors.popupCardBackground,
+        title = { Text("Delete Account", color = MaterialTheme.poopAppColors.textPrimary) },
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("Are you sure you want to delete your account? This action cannot be undone.")
+                Text(
+                    "Are you sure you want to delete your account? This action cannot be undone.",
+                    color = MaterialTheme.poopAppColors.textPrimary
+                )
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Enter your password to confirm") },
-                    modifier = Modifier.fillMaxWidth()
+                    label = { Text("Enter your password to confirm", color = MaterialTheme.poopAppColors.textPrimary) },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        unfocusedTextColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        unfocusedContainerColor = MaterialTheme.poopAppColors.textFieldBackground,
+                        cursorColor = MaterialTheme.poopAppColors.textPrimary,
+                        focusedBorderColor = MaterialTheme.poopAppColors.buttonBackground,
+                        unfocusedBorderColor = MaterialTheme.poopAppColors.buttonBackground
+                    )
                 )
                 if (showError) {
                     Text(
@@ -542,7 +620,12 @@ private fun DeleteAccountDialog(
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(
+                    contentColor = MaterialTheme.poopAppColors.textPrimary
+                )
+            ) {
                 Text("Cancel")
             }
         }
