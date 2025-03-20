@@ -10,8 +10,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.google.firebase.Firebase
 import es.uc3m.android.poopapp.data.model.BristolType
 import es.uc3m.android.poopapp.data.model.PoopLog
+import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import es.uc3m.android.poopapp.firebase.FirebaseManager
+
 
 @Composable
 fun AddPoopLogDialog(
@@ -126,15 +131,32 @@ fun AddPoopLogDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
-                            onConfirm(
-                                PoopLog(
+
+                                val poopLog = PoopLog(
+                                    timestamp = Timestamp.now(), // ✅ Assign current Firestore timestamp
                                     bristolScale = bristolScale,
                                     duration = duration,
                                     strain = strain,
                                     completeness = completeness,
                                     notes = notes
                                 )
-                            )
+
+                            onConfirm(poopLog)
+                            val currentUser = FirebaseAuth.getInstance().currentUser
+                            if (currentUser != null) {
+                                    FirebaseManager().savePoopLog(
+                                        userId = currentUser.uid,
+                                        poopLog = poopLog,
+                                        onSuccess = {
+                                            println(" Poop log saved successfully!")
+                                        },
+                                        onError = { error ->
+                                            println(" Error saving poop log: $error")
+                                        }
+                                    )
+                                } else {
+                                    println(" No authenticated user found.")
+                                }
                             onDismiss()
                         }
                     ) {

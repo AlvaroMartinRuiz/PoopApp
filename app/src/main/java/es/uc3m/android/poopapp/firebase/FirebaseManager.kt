@@ -2,11 +2,17 @@ package es.uc3m.android.poopapp.firebase
 
 import android.content.Context
 import android.widget.Toast
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import es.uc3m.android.poopapp.data.model.PoopLog
+import es.uc3m.android.poopapp.data.model.User
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class FirebaseManager {
     private val auth = FirebaseAuth.getInstance()
@@ -88,16 +94,19 @@ class FirebaseManager {
                                             // Even if setting profile fails, we've created the account, so consider it a success
                                             onSuccess(user)
                                         }
+                                        saveUserToFirestore(user)
                                     }
                                     .addOnFailureListener { exception ->
                                         println("📱 PoopApp: Firebase - Profile update failure: ${exception.message}")
                                         // Even if profile update fails, the registration succeeded
                                         onSuccess(user)
+                                        saveUserToFirestore(user)
                                     }
                             } catch (e: Exception) {
                                 println("📱 PoopApp: Firebase - Exception during profile update: ${e.message}")
                                 // Even if we couldn't set the profile, the account was created
                                 onSuccess(user)
+                                saveUserToFirestore(user)
                             }
                         } else {
                             println("📱 PoopApp: Firebase - User is null after successful registration")
@@ -156,4 +165,42 @@ class FirebaseManager {
             signOut()
         }
     }
-} 
+
+    private fun saveUserToFirestore(user: FirebaseUser) {
+        // Use User data class
+
+        val userData = User(
+            uid = user.uid,
+            email = user.email ?: "",
+            displayName = user.displayName ?: "Anonymous",
+            createdAt = Timestamp.now()
+        )
+
+        val userRef = firestore.collection("users").document(user.uid)
+
+        userRef.set(userData) // Now saving as a structured User object
+            .addOnSuccessListener {
+                println("User saved to Firestore!")
+            }
+            .addOnFailureListener { e ->
+                println(" Error saving user: ${e.message}")
+            }
+    }
+
+    fun savePoopLog(userId: String, poopLog: PoopLog, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        firestore.collection("users").document(userId)
+            .collection("poop_logs") //  Subcollection created dynamically
+            .add(poopLog) // Auto-generates document ID
+            .addOnSuccessListener {
+                println(" Poop log added successfully!")
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                println(" Error saving poop log: ${e.message}")
+                onError(e.message ?: "Unknown error")
+            }
+    }
+
+
+}
+

@@ -1,12 +1,12 @@
 package es.uc3m.android.poopapp.data.model
 
-import java.util.Date
+import com.google.firebase.Timestamp
 
 data class PoopLog(
     val id: String = "",
     val userId: String = "",
-    val timestamp: Date = Date(),
-    val bristolScale: Int = 4, // 1-7 Bristol Stool Scale
+    val timestamp: Timestamp = Timestamp.now(),
+        val bristolScale: Int = 4, // 1-7 Bristol Stool Scale
     val duration: Int = 0, // Duration in minutes
     val strain: Int = 0, // 1-5 scale
     val completeness: Int = 0, // 1-5 scale
