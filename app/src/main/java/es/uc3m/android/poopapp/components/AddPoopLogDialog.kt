@@ -13,7 +13,6 @@ import androidx.compose.ui.window.Dialog
 import es.uc3m.android.poopapp.data.model.BristolType
 import es.uc3m.android.poopapp.data.model.PoopLog
 import java.util.Date
-import es.uc3m.android.poopapp.firebase.FirebaseManager
 import es.uc3m.android.poopapp.firebase.FirebaseRepository
 import com.google.firebase.auth.FirebaseAuth
 
@@ -131,20 +130,19 @@ fun AddPoopLogDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = {
-
-                            val poopLog = PoopLog(
-                                timestamp = Date(), // ✅ Assign current Firestore timestamp
-                                bristolScale = bristolScale,
-                                duration = duration,
-                                strain = strain,
-                                completeness = completeness,
-                                notes = notes
-                            )
-
-                            onConfirm(poopLog)
                             val currentUser = FirebaseAuth.getInstance().currentUser
                             if (currentUser != null) {
-                                FirebaseManager().savePoopLog(
+                                val poopLog = PoopLog(
+                                    userId = currentUser.uid,
+                                    timestamp = Date(), // ✅ Assign current Firestore timestamp
+                                    bristolScale = bristolScale,
+                                    duration = duration,
+                                    strain = strain,
+                                    completeness = completeness,
+                                    notes = notes
+                                )
+                                onConfirm(poopLog)
+                                FirebaseRepository.savePoopLog(
                                     userId = currentUser.uid,
                                     poopLog = poopLog,
                                     onSuccess = {

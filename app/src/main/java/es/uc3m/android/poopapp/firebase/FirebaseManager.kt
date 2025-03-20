@@ -1,5 +1,5 @@
 package es.uc3m.android.poopapp.firebase
-
+// Used for profile and sheetshare
 import android.content.Context
 import android.widget.Toast
 import com.google.firebase.Timestamp
@@ -191,19 +191,7 @@ class FirebaseManager {
             }
     }
 
-    fun savePoopLog(userId: String, poopLog: PoopLog, onSuccess: () -> Unit, onError: (String) -> Unit) {
-        firestore.collection("users").document(userId)
-            .collection("poop_logs") //  Subcollection created dynamically
-            .add(poopLog) // Auto-generates document ID
-            .addOnSuccessListener {
-                println(" Poop log added successfully!")
-                onSuccess()
-            }
-            .addOnFailureListener { e ->
-                println(" Error saving poop log: ${e.message}")
-                onError(e.message ?: "Unknown error")
-            }
-    }
+
 
 
     fun createLeague(
@@ -246,6 +234,17 @@ class FirebaseManager {
                 .toObjects(LeaderboardEntry::class.java)
         } catch (e: Exception) {
             println("❌ Error fetching leaderboard entries: ${e.message}")
+            emptyList()
+        }
+    }
+    suspend fun getLeaguesForUser(userId: String): List<League> {
+        return try {
+            val snapshot = firestore.collection("leagues")
+                .whereArrayContains("members", userId) // 🔥 Filter only leagues where the user is a member
+                .get()
+                .await()
+            snapshot.toObjects(League::class.java)
+        } catch (e: Exception) {
             emptyList()
         }
     }

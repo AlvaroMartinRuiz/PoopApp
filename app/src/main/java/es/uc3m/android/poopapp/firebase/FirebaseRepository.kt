@@ -1,5 +1,5 @@
 package es.uc3m.android.poopapp.firebase
-
+// Used for pooplogs
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -19,7 +19,19 @@ object FirebaseRepository {
     
     // Pooplog collection reference for a user
     private fun getPoopLogsRef(userId: String) = getUserRef(userId).collection("pooplogs")
-    
+    fun savePoopLog(userId: String, poopLog: PoopLog, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        db.collection("users").document(userId)
+            .collection("poop_logs") //  Subcollection created dynamically
+            .add(poopLog) // Auto-generates document ID
+            .addOnSuccessListener {
+                println(" Poop log added successfully!")
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                println(" Error saving poop log: ${e.message}")
+                onError(e.message ?: "Unknown error")
+            }
+    }
     // Add a new pooplog with proper ID generation
     suspend fun addPoopLog(poopLog: PoopLog): String {
         val currentUserId = auth.currentUser?.uid ?: throw Exception("User not authenticated")

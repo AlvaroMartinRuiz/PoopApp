@@ -35,7 +35,7 @@ fun ShitShareScreen(
     LaunchedEffect(Unit) {
         coroutineScope.launch {
             leagues.clear()
-            leagues.addAll(firebaseManager.getLeagues())
+            leagues.addAll(firebaseManager.getLeaguesForUser(userId))
         }
     }
 
@@ -91,6 +91,10 @@ fun ShitShareScreen(
             onLeagueCreated = { newLeague ->
                 selectedLeague = newLeague // 🔥 Redirect to the created league
                 showCreateLeagueDialog = false
+                coroutineScope.launch {
+                    leagues.clear()
+                    leagues.addAll(firebaseManager.getLeaguesForUser(userId)) // ✅ Refresh UI
+                }
             }
         )
     }
@@ -105,7 +109,7 @@ fun ShitShareScreen(
                         firebaseManager.joinLeague(userId, league)
                         // Refresh leagues
                         leagues.clear()
-                        leagues.addAll(firebaseManager.getLeagues())
+                        leagues.addAll(firebaseManager.getLeaguesForUser(userId))
                     }
                     showJoinLeagueDialog = false
                 }
