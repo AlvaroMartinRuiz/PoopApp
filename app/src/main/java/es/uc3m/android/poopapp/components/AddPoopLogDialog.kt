@@ -171,24 +171,15 @@ fun AddPoopLogDialog(
                             if (currentUser != null) {
                                 val poopLog = PoopLog(
                                     userId = currentUser.uid,
-                                    timestamp = Date(), // ✅ Assign current Firestore timestamp
+                                    timestamp = Date(), // Use current timestamp
                                     bristolScale = bristolScale,
                                     duration = duration,
                                     strain = strain,
                                     completeness = completeness,
                                     notes = notes
                                 )
+                                // Delegate saving to the caller
                                 onConfirm(poopLog)
-                                FirebaseRepository.savePoopLog(
-                                    userId = currentUser.uid,
-                                    poopLog = poopLog,
-                                    onSuccess = {
-                                        println(" Poop log saved successfully!")
-                                    },
-                                    onError = { error ->
-                                        println(" Error saving poop log: $error")
-                                    }
-                                )
                             } else {
                                 println(" No authenticated user found.")
                             }
