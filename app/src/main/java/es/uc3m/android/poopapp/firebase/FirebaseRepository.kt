@@ -178,33 +178,32 @@ object FirebaseRepository {
             }
         }
         
-        // Calculate longest streak (looking at all sequences)
-        var longestStreak = currentStreak
-        var tempStreak = 0
-        
-        for (i in 0 until dates.size - 1) {
+        // Calculate longest streak across all logs
+        var longestStreak = 1
+        var tempStreak = 1
+
+        for (i in 1 until dates.size) {
+            val prevDate = dates[i - 1]
             val currentDate = dates[i]
-            val nextDate = dates[i + 1]
-            
-            val diffInMillis = currentDate.time - nextDate.time
+
+            val diffInMillis = prevDate.time - currentDate.time
             val diffInDays = diffInMillis / (1000 * 60 * 60 * 24)
-            
+
             if (diffInDays == 1L) {
                 // Consecutive days
                 tempStreak++
             } else {
-                // Streak broken
-                tempStreak = 0
-            }
-            
-            if (tempStreak > longestStreak) {
-                longestStreak = tempStreak
+                // Streak broken, update longest if needed
+                if (tempStreak > longestStreak) {
+                    longestStreak = tempStreak
+                }
+                tempStreak = 1
             }
         }
-        
-        // Add 1 to longest streak to account for the first day
-        if (dates.isNotEmpty()) {
-            longestStreak++
+
+        // Final check in case the longest streak is at the end
+        if (tempStreak > longestStreak) {
+            longestStreak = tempStreak
         }
         
         return Pair(currentStreak, longestStreak)
