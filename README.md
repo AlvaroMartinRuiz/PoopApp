@@ -38,3 +38,7 @@ If you'd like to test or edit The Poop App locally, you can open it in Android S
 3. **⚠️ Important Note on Firebase Permissions:** 
    Because this application relies heavily on a secure Firebase backend (Authentication and Firestore), you will need a valid `google-services.json` file to run it with full capabilities. Unless you have authorization for the original Firebase project, you will need to create your own Firebase project, register the app, and generate a new `google-services.json` file to place in the `app/` directory.
 4. **Run on an Emulator or Device** via Android Studio.
+
+## VIDEO DEMO:
+If you like to have a look at how the app works, see this video where we show the functionalities of the app!
+https://www.youtube.com/watch?v=hUigo7fBZ8A
