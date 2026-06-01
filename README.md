@@ -1,6 +1,6 @@
 # The Poop App
 
-A fun-but-functional Android app for tracking digestive habits — with a social, gamified twist. Log your bathroom visits, climb leaderboards with friends, and find public restrooms wherever you are.
+A fun-but-functional Android app for tracking digestive habits, with a social, gamified part. Log your bathroom visits, climb leaderboards with friends, and find public restrooms wherever you are.
 
 ▶️ **Watch the demo:** <https://www.youtube.com/watch?v=hUigo7fBZ8A>
 
@@ -26,16 +26,15 @@ A fun-but-functional Android app for tracking digestive habits — with a social
 
 ## The team
 
-Built by a four-person team at UC3M (Group 196), under the supervision of *Boni García Gutiérrez*:
+Built by a four friends, everyone contributed in everything, but each member specialized in one specific part of the app:
 
 | Contributor | Owned |
 |---|---|
 | **Álvaro Martín Ruiz** *(this repo)* | **Shitshare** — the social-network / gamified-leagues feature (leagues, friend invites, leaderboards) |
-| Carlos Fernández-Yáñez · [@carlosfya](https://github.com/carlosfya) | Firebase Authentication, user profiles, cloud storage |
+| Carlos Fernández-Yáñez | Firebase Authentication, user profiles, cloud storage |
 | Alejandro Fonseca | Google Maps integration, bathroom-finder UI |
 | Pablo Simón Martín | Core Poop Tracker, analytics and notifications |
 
-> This repository is a public mirror of the original team repo at [`carlosfya/PoopApp`](https://github.com/carlosfya/PoopApp), published here for portfolio purposes. All contributors retain credit; my own contribution is documented above.
 
 ## Run it locally
 
